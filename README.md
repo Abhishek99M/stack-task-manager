@@ -17,6 +17,8 @@ Password: demo1234
 
 ![Stack dashboard](docs/dashboard.png)
 
+![Drag-and-drop Kanban](docs/kanban.png)
+
 ---
 
 ## Features
