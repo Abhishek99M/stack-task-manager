@@ -2,7 +2,7 @@
 
 > A clean, fast task manager for small teams. Projects, drag-and-drop Kanban, role-based access, and a dashboard that gives you the whole picture at a glance.
 
-**🔗 Live demo:** `<paste-your-railway-url-here>`
+**🔗 Live demo:** <https://stack-task-manager-production.up.railway.app>
 **👤 Demo credentials** (password is the same for all three):
 
 | Role   | Email                  | Name         |
