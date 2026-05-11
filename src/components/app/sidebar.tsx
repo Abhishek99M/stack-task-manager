@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { FolderKanban, LayoutDashboard } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -35,14 +36,24 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-accent text-foreground"
+                  ? "text-foreground"
                   : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
               )}
             >
-              <Icon className="size-4" />
-              {item.label}
+              {isActive && (
+                <motion.span
+                  layoutId="sidebar-active"
+                  className="absolute inset-0 rounded-md bg-accent ring-1 ring-violet-500/15"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <Icon className="relative size-4" />
+              <span className="relative">{item.label}</span>
+              {isActive && (
+                <span className="relative ml-auto size-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_hsl(263_75%_60%)]" />
+              )}
             </Link>
           );
         })}

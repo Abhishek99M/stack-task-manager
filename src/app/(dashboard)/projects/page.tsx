@@ -1,13 +1,10 @@
-import Link from "next/link";
-import { ArrowRight, FolderKanban } from "lucide-react";
+import { FolderKanban } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
-import { Badge } from "@/components/ui/badge";
 import { NewProjectButton } from "@/components/projects/new-project-button";
-import { formatRelative } from "@/lib/utils";
+import { ProjectCard } from "@/components/projects/project-card";
 
 export const metadata = { title: "Projects · Stack" };
 export const dynamic = "force-dynamic";
@@ -39,49 +36,25 @@ export default async function ProjectsPage() {
         <NewProjectButton />
       </header>
 
-      {projects.length === 0 ? <EmptyState /> : (
+      {projects.length === 0 ? (
+        <EmptyState />
+      ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p) => (
-            <Link
+          {projects.map((p, i) => (
+            <ProjectCard
               key={p.id}
-              href={`/projects/${p.id}`}
-              className="group relative overflow-hidden rounded-xl border border-border bg-card/40 p-5 transition-all hover:border-violet-500/30 hover:bg-card/70"
-            >
-              <div
-                className="absolute inset-x-0 top-0 h-0.5"
-                style={{ backgroundColor: p.color }}
-              />
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-base font-semibold">{p.name}</h3>
-                  {p.description ? (
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      {p.description}
-                    </p>
-                  ) : (
-                    <p className="mt-1 text-sm italic text-muted-foreground/70">
-                      No description
-                    </p>
-                  )}
-                </div>
-                {p.memberships[0]?.role === Role.ADMIN && (
-                  <Badge variant="secondary" className="shrink-0 bg-violet-500/15 text-violet-300 ring-1 ring-violet-500/20">
-                    Admin
-                  </Badge>
-                )}
-              </div>
-
-              <div className="mt-5 flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center gap-3">
-                  <span>{p._count.tasks} task{p._count.tasks === 1 ? "" : "s"}</span>
-                  <span className="size-1 rounded-full bg-border" />
-                  <span>{p._count.memberships} member{p._count.memberships === 1 ? "" : "s"}</span>
-                </div>
-                <span>Updated {formatRelative(p.updatedAt)}</span>
-              </div>
-
-              <ArrowRight className="absolute right-4 bottom-4 size-4 text-muted-foreground/50 opacity-0 transition-all group-hover:opacity-100 group-hover:text-violet-300" />
-            </Link>
+              index={i}
+              project={{
+                id: p.id,
+                name: p.name,
+                description: p.description,
+                color: p.color,
+                taskCount: p._count.tasks,
+                memberCount: p._count.memberships,
+                myRole: p.memberships[0]?.role ?? "MEMBER",
+                updatedAt: p.updatedAt,
+              }}
+            />
           ))}
         </div>
       )}

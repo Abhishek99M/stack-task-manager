@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
-import { TaskPriority } from "@prisma/client";
+import { TaskPriority, TaskStatus } from "@prisma/client";
 import { AlertOctagon, AlertTriangle, ArrowDown, Calendar, Equal, GripVertical } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn, formatRelative, initials, isOverdue } from "@/lib/utils";
@@ -36,6 +37,12 @@ const priorityStyles: Record<
   },
 };
 
+const STATUS_PULSE: Record<TaskStatus, string> = {
+  TODO: "0 0 0 2px hsl(0 0% 60% / 0.4)",
+  IN_PROGRESS: "0 0 0 2px hsl(263 75% 60% / 0.55)",
+  DONE: "0 0 0 2px hsl(160 70% 50% / 0.5)",
+};
+
 export function TaskCard({
   task,
   onOpen,
@@ -64,14 +71,36 @@ export function TaskCard({
   const overdue = isOverdue(task.dueDate, task.status);
   const priority = priorityStyles[task.priority];
 
+  const [pulse, setPulse] = useState(false);
+  const prevStatus = useRef<TaskStatus>(task.status);
+
+  useEffect(() => {
+    if (dragOverlay) return;
+    if (prevStatus.current !== task.status) {
+      prevStatus.current = task.status;
+      setPulse(true);
+      const t = setTimeout(() => setPulse(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [task.status, dragOverlay]);
+
   return (
     <motion.div
       ref={setNodeRef}
       style={style}
       layout={!dragOverlay}
       initial={dragOverlay ? false : { opacity: 0, y: 4 }}
-      animate={{ opacity: isDragging && !dragOverlay ? 0 : 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      animate={{
+        opacity: isDragging && !dragOverlay ? 0 : 1,
+        y: 0,
+        boxShadow: pulse ? STATUS_PULSE[task.status] : "0 0 0 0 transparent",
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 380,
+        damping: 30,
+        boxShadow: { duration: 0.4, ease: "easeOut" },
+      }}
       onClick={() => !isDragging && onOpen?.()}
       className={cn(
         "group relative cursor-grab rounded-lg border bg-card p-3 transition-colors active:cursor-grabbing",
@@ -133,6 +162,18 @@ export function TaskCard({
           <div className="size-6 rounded-full border border-dashed border-border" aria-hidden />
         )}
       </div>
+
+      <AnimatePresence>
+        {pulse && !dragOverlay && (
+          <motion.span
+            initial={{ opacity: 0.6, scale: 0.9 }}
+            animate={{ opacity: 0, scale: 1.04 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-violet-400/40"
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

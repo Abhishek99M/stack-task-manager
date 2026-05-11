@@ -14,6 +14,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CountUp } from "@/components/ui/count-up";
 import { Separator } from "@/components/ui/separator";
 import { StatusBreakdown } from "@/components/dashboard/status-breakdown";
 import { cn, formatRelative, isOverdue } from "@/lib/utils";
@@ -247,22 +248,41 @@ function StatCard({
   icon: React.ReactNode;
   tone: "violet" | "rose" | "emerald" | "sky" | "muted";
 }) {
-  const tones: Record<string, string> = {
-    violet: "bg-violet-500/10 text-violet-300 ring-violet-500/20",
-    rose: "bg-rose-500/10 text-rose-300 ring-rose-500/20",
-    emerald: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/20",
-    sky: "bg-sky-500/10 text-sky-300 ring-sky-500/20",
-    muted: "bg-accent text-muted-foreground ring-border",
+  const tones: Record<string, { iconBg: string; glow: string }> = {
+    violet: {
+      iconBg: "bg-violet-500/10 text-violet-300 ring-violet-500/20",
+      glow: "from-violet-500/[0.07] to-transparent",
+    },
+    rose: {
+      iconBg: "bg-rose-500/10 text-rose-300 ring-rose-500/20",
+      glow: "from-rose-500/[0.07] to-transparent",
+    },
+    emerald: {
+      iconBg: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/20",
+      glow: "from-emerald-500/[0.07] to-transparent",
+    },
+    sky: {
+      iconBg: "bg-sky-500/10 text-sky-300 ring-sky-500/20",
+      glow: "from-sky-500/[0.07] to-transparent",
+    },
+    muted: {
+      iconBg: "bg-accent text-muted-foreground ring-border",
+      glow: "from-transparent to-transparent",
+    },
   };
+  const t = tones[tone];
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-4">
-      <div className="flex items-center justify-between">
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card/40 p-4 transition-colors hover:border-border/80 hover:bg-card/60">
+      <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity group-hover:opacity-100", t.glow)} />
+      <div className="relative flex items-center justify-between">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <span className={cn("inline-flex size-7 items-center justify-center rounded-md ring-1", tones[tone])}>
+        <span className={cn("inline-flex size-7 items-center justify-center rounded-md ring-1 transition-transform group-hover:scale-110", t.iconBg)}>
           {icon}
         </span>
       </div>
-      <p className="mt-2 text-3xl font-semibold tabular-nums">{value}</p>
+      <p className="relative mt-2 text-3xl font-semibold tabular-nums">
+        <CountUp value={value} />
+      </p>
     </div>
   );
 }

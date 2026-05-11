@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { TaskStatus } from "@prisma/client";
+import { motion } from "framer-motion";
 import {
   PieChart,
   Pie,
@@ -54,20 +55,23 @@ export function StatusBreakdown({
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-      <div className="relative h-40 w-40 shrink-0">
+    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
+      <div className="relative size-36 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               dataKey="value"
-              innerRadius={48}
-              outerRadius={70}
+              innerRadius={42}
+              outerRadius={62}
               paddingAngle={2}
               stroke="hsl(var(--card))"
               strokeWidth={2}
               startAngle={90}
               endAngle={-270}
+              isAnimationActive
+              animationDuration={800}
+              animationEasing="ease-out"
             >
               {data.map((d) => (
                 <Cell key={d.status} fill={d.color} />
@@ -86,31 +90,41 @@ export function StatusBreakdown({
           </PieChart>
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-2xl font-semibold tabular-nums">{total}</p>
+          <motion.p
+            className="text-2xl font-semibold tabular-nums"
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
+            {total}
+          </motion.p>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
             Total
           </p>
         </div>
       </div>
 
-      <ul className="flex flex-1 flex-col gap-1.5">
-        {data.map((d) => (
-          <li key={d.status} className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2">
-              <span
-                className="size-2 shrink-0 rounded-full"
-                style={{ backgroundColor: d.color }}
-              />
-              <span className="truncate text-sm">{d.name}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="tabular-nums">{d.value}</span>
-              <span>·</span>
-              <span className="tabular-nums">
-                {Math.round((d.value / total) * 100)}%
-              </span>
-            </div>
-          </li>
+      <ul className="w-full min-w-0 flex-1 space-y-2">
+        {data.map((d, i) => (
+          <motion.li
+            key={d.status}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 + i * 0.08, duration: 0.3 }}
+            className="flex items-center gap-3"
+          >
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: d.color }}
+            />
+            <span className="min-w-0 flex-1 truncate text-sm">{d.name}</span>
+            <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
+              {d.value}
+            </span>
+            <span className="shrink-0 tabular-nums text-xs font-medium text-foreground/80 min-w-[2.5rem] text-right">
+              {Math.round((d.value / total) * 100)}%
+            </span>
+          </motion.li>
         ))}
       </ul>
     </div>
